@@ -31,6 +31,13 @@ class SaveDecoder:
             self.java_cmd = str(bundled_java)
         else:
             self.java_cmd = "java"
+
+        # ====== 核心新增：配置 Windows 下隐藏子进程黑窗口 ======
+        self._startupinfo = None
+        if sys.platform == "win32":
+            self._startupinfo = subprocess.STARTUPINFO()
+            self._startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            self._startupinfo.wShowWindow = subprocess.SW_HIDE
         # ==========================================
 
     def ensure_ready(self) -> None:
@@ -38,8 +45,8 @@ class SaveDecoder:
             raise DDHelperError(f"DDSaveEditor.jar not found: {self.jar_path}")
         try:
             # subprocess.run(["java", "-version"], capture_output=True, text=True, check=False)
-            # 将硬编码的 "java" 替换为 self.java_cmd
-            subprocess.run([self.java_cmd, "-version"], capture_output=True, text=True, check=False)
+            # 将硬编码的 "java" 替换为 self.java_cmd，加上 startupinfo=self._startupinfo
+            subprocess.run([self.java_cmd, "-version"], capture_output=True, text=True, check=False, startupinfo=self._startupinfo)
         except FileNotFoundError as exc:
             raise DDHelperError("Java runtime not found in PATH") from exc
 
@@ -58,7 +65,8 @@ class SaveDecoder:
                 str(out_file),
                 str(src_file),
             ]
-            result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+            # 加上 startupinfo=self._startupinfo，彻底静默后台运行
+            result = subprocess.run(cmd, capture_output=True, text=True, check=False, startupinfo=self._startupinfo)
             if result.returncode != 0:
                 raise DDHelperError(
                     f"Decode failed for {src_file.name}: {result.stderr.strip() or result.stdout.strip()}"
