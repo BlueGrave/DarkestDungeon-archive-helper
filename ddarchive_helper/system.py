@@ -20,6 +20,10 @@ def is_darkest_running() -> bool:
             startupinfo=startupinfo, # <-- 传入隐藏参数
         )
         output = result.stdout.lower()
+        
+        # 调试打印：把后台实际抓到的内容输出出来
+        print(f"[Debug is_darkest_running] returncode={result.returncode}, output={repr(result.stdout)}")
+        
         return "darkest.exe" in output
     except Exception:
         return False
