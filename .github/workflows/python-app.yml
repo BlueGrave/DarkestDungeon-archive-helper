@@ -42,11 +42,11 @@ jobs:
         # 源码依赖外部的 assets(字体), images(图片), tools(Java解码器) 文件夹
         # 需要将它们复制到打包好的 dist/DDSaveHelper 目录中
         Copy-Item -Path "images" -Destination "DDArchiveHelper\images" -Recurse -ErrorAction SilentlyContinue
-        Copy-Item -Path "assets" -Destination "DDArchiveHelper\assets\fonts" -Recurse -ErrorAction SilentlyContinue
+        Copy-Item -Path "assets" -Destination "DDArchiveHelper\assets" -Recurse -ErrorAction SilentlyContinue
         Copy-Item -Path "tools" -Destination "DDArchiveHelper\tools" -Recurse -ErrorAction SilentlyContinue
         
     - name: Upload Artifact
       uses: actions/upload-artifact@v6
       with:
-        name: DDArchiveHelper-Windows-Release
+        name: DDArchiveHelper
         path: DDArchiveHelper
