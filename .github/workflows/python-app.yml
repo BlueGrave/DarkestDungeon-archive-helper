@@ -6,7 +6,7 @@ name: Build Windows Executable / Python application
 on:
   push:
     branches: [ "main" ] # 当推送到主分支时自动触发
-    workflow_dispatch: # 允许在 Actions 页面手动点击运行
+  workflow_dispatch: # 允许在 Actions 页面手动点击运行
 
 jobs:
   build:
@@ -35,7 +35,8 @@ jobs:
         # --noconsole: 运行时不显示黑色命令行窗口 (对于 GUI 程序很重要)
         # --name: 生成的 exe 和文件夹名称
         # --icon: 设置程序图标
-        pyinstaller --noconfirm --noconsole --name "DDArchiveHelper" --icon="images/sign.png" dd_helper.py
+        # 增加了 --distpath . 参数，告诉它直接输出到当前目录，而不是默认的 dist 里
+        pyinstaller --noconfirm --noconsole --name "DDArchiveHelper" --icon="images/sign.png" --distpath . dd_helper.py
         
     - name: Bundle External Assets
       run: |
