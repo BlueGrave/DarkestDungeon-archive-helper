@@ -4,6 +4,7 @@ import subprocess
 
 
 def is_darkest_running() -> bool:
+    print(f"[Debug System] 已经进入 is_darkest_running 函数")  # <-- 放在最前面
     try:
         # 配置 Windows 下隐藏子进程黑窗口
         startupinfo = None
@@ -26,5 +27,6 @@ def is_darkest_running() -> bool:
         print(f"[Debug Tasklist] output 内容为: {repr(output)}")
         
         return "darkest.exe" in output
-    except Exception:
+    except Exception as exc:
+        print(f"[Debug Tasklist] 发生致命异常: {exc}")  # <-- 如果报错能在这里看到
         return False
