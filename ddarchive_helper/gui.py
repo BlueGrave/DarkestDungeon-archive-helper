@@ -552,10 +552,16 @@ class GUIApp:
             command=self.refresh_profiles,
             style="Subtle.TButton",
         )
-        self.btn_f5 = ttk.Button(
+        # self.btn_f5 = ttk.Button(
+            # self.advanced_panel,
+            # text="立即F5存档（按钮替代）",
+            # command=self.on_f5_button,
+            # style="Subtle.TButton",
+        # )
+        self.btn_f8 = ttk.Button(
             self.advanced_panel,
-            text="立即F5存档（按钮替代）",
-            command=self.on_f5_button,
+            text="立即F8存档（按钮替代）",
+            command=self.on_f8_button,
             style="Subtle.TButton",
         )
         self.btn_refresh = ttk.Button(
@@ -567,7 +573,8 @@ class GUIApp:
 
         self.btn_settings.grid(row=1, column=0, sticky="ew", padx=(0, 4), pady=(0, 6))
         self.btn_profile_refresh.grid(row=1, column=1, sticky="ew", padx=(4, 0), pady=(0, 6))
-        self.btn_f5.grid(row=2, column=0, columnspan=2, sticky="ew", pady=(0, 6))
+        # self.btn_f5.grid(row=2, column=0, columnspan=2, sticky="ew", pady=(0, 6))
+        self.btn_f8.grid(row=2, column=0, columnspan=2, sticky="ew", pady=(0, 6))
         self.btn_refresh.grid(row=3, column=0, columnspan=2, sticky="ew")
         self.advanced_panel.grid_remove()
 
@@ -998,9 +1005,11 @@ class GUIApp:
                 elif et == "hotkey":
                     reg = event.get("registered")
                     if reg:
-                        self.status_info.set("全局F5热键已注册")
+                        # self.status_info.set("全局F5热键已注册")
+                        self.status_info.set("全局F8热键已注册")
                     else:
-                        self.status_info.set("全局F5热键注册失败")
+                        # self.status_info.set("全局F5热键注册失败")
+                        self.status_info.set("全局F8热键注册失败")
                 elif et == "state":
                     self._refresh_state_labels()
         except queue.Empty:
@@ -1090,10 +1099,15 @@ class GUIApp:
             return
         self._run_async(self.engine.trigger_manual_closed_snapshot, "手动存档完成")
 
-    def on_f5_button(self) -> None:
+    # def on_f5_button(self) -> None:
+        # if not self._ensure_save_root(interactive=True):
+            # return
+        # self._run_async(lambda: self.engine.trigger_f5_snapshot(source_reason="hotkey_f5"), "F5存档完成")
+
+    def on_f8_button(self) -> None:
         if not self._ensure_save_root(interactive=True):
             return
-        self._run_async(lambda: self.engine.trigger_f5_snapshot(source_reason="hotkey_f5"), "F5存档完成")
+        self._run_async(lambda: self.engine.trigger_f8_snapshot(source_reason="hotkey_f8"), "F8存档完成")
 
     def on_restore(self) -> None:
         if not self._ensure_save_root(interactive=True):
