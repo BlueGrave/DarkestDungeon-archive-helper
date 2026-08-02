@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import subprocess
-
+import sys  # <--- 确保加上这一行！
 
 def is_darkest_running() -> bool:
     print(f"[Debug System] 已经进入 is_darkest_running 函数")  # <-- 放在最前面
