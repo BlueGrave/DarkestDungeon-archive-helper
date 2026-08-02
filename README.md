@@ -1,6 +1,6 @@
 # DarkestDungeon-archive-helper
 
-暗黑地牢自动存档/回档助手（Windows）。
+《暗黑地牢》自动存档/回档助手（Windows）。
 
 ## 运行环境
 
