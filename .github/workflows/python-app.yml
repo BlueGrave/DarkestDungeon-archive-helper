@@ -14,7 +14,7 @@ jobs:
 
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       
     - name: Set up Python 3.10
       uses: actions/setup-python@v5
@@ -46,7 +46,7 @@ jobs:
         Copy-Item -Path "tools" -Destination "DDArchiveHelper\tools" -Recurse -ErrorAction SilentlyContinue
         
     - name: Upload Artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: DDArchiveHelper-Windows-Release
         path: DDArchiveHelper
