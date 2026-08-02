@@ -88,8 +88,23 @@ def run_monitor(engine: MonitorEngine) -> int:
 
 
 def main() -> int:
-    script_dir = Path(__file__).resolve().parent.parent
-    config_path = script_dir / "config.json"
+    # script_dir = Path(__file__).resolve().parent.parent
+    # config_path = script_dir / "config.json"
+    
+    # ====== 核心修改：动态获取根目录 ======
+    if getattr(sys, 'frozen', False):
+        # 1. 如果是被打包成 exe 运行，根目录就是 .exe 所在的外部目录
+        base_dir = Path(sys.executable).parent
+    else:
+        # 2. 如果是源码运行，根目录通常是当前文件（cli.py）向上两级或一级
+        # 注意：这里请保持原来代码里 Path(__file__) 后面的 .parent 数量一致！
+        # 如果原来的代码是 Path(__file__).resolve().parent.parent，就照抄：
+        base_dir = Path(__file__).resolve().parent.parent
+    # ======================================
+
+    # 接下来，使用 base_dir 来定义 config.json 的路径
+    config_path = base_dir / "config.json"
+    
     config = load_or_create_config(config_path)
 
     parser = argparse.ArgumentParser(description="Darkest Dungeon restore helper")
