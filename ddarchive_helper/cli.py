@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import queue
+import sys # <--- 新增这一行
 from pathlib import Path
 
 from .config import AppConfig, load_or_create_config
@@ -97,6 +98,13 @@ def main() -> int:
     sub.add_parser("gui", help="Start Tkinter GUI")
     sub.add_parser("monitor", help="Run background monitor without GUI")
     sub.add_parser("verify", help="Verify environment and decode access")
+
+    # ==========================
+    # 增加以下两行代码：
+    # 如果用户直接双击 exe，没有输入 command，强制分配 'gui'
+    if len(sys.argv) == 1:
+        sys.argv.append('gui')
+    # ==========================
 
     args = parser.parse_args()
 
