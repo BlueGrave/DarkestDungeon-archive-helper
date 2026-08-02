@@ -34,7 +34,7 @@ jobs:
         # --name: 生成的 exe 和文件夹名称
         # --icon: 设置程序图标
         # 增加了 --distpath . 参数，告诉它直接输出到当前目录，而不是默认的 dist 里
-        pyinstaller --noconfirm --name "DDArchiveHelper" --icon="images/sign.png" --distpath . dd_helper.py
+        pyinstaller --noconfirm --noconsole --name "DDArchiveHelper" --icon="images/sign.png" --distpath . dd_helper.py
         
     - name: Bundle External Assets
       run: |
