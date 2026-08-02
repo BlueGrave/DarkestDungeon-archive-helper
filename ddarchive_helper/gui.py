@@ -46,8 +46,19 @@ class GUIApp:
         self.manager = manager
         self.logger = logger
         self.config_path = config_path
-        self.assets_root = Path(__file__).resolve().parents[1] / "images"
-        self.fonts_root = Path(__file__).resolve().parents[1] / "assets" / "fonts"
+        # ====== 核心修改：动态获取根目录 ======
+        if getattr(sys, 'frozen', False):
+            # 如果是被打包成 exe 运行，根目录就是 exe 所在的目录
+            base_dir = Path(sys.executable).parent
+        else:
+            # 如果是源码运行，根目录是当前文件向上两级
+            base_dir = Path(__file__).resolve().parents[1]
+            
+        self.assets_root = base_dir / "images"
+        self.fonts_root = base_dir / "assets" / "fonts"
+        # ======================================
+        # self.assets_root = Path(__file__).resolve().parents[1] / "images"
+        # self.fonts_root = Path(__file__).resolve().parents[1] / "assets" / "fonts"
         self._icon_photo: Optional[tk.PhotoImage] = None
         self._icon_badge: Optional[tk.PhotoImage] = None
         self._girl_photo_raw: Optional[tk.PhotoImage] = None
