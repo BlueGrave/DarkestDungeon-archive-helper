@@ -1,18 +1,22 @@
 BUCKET_CLOSED_MANUAL = "closed_manual"
-BUCKET_RUNTIME_F5 = "runtime_f5"
+# BUCKET_RUNTIME_F5 = "runtime_f5"
+BUCKET_RUNTIME_F8 = "runtime_f8"
 BUCKET_PRE_RAID_AUTO = "pre_raid_auto"
 BUCKET_RUNTIME_POLL_TEMP = "_runtime_poll_temp"
 BUCKETS = (
     BUCKET_CLOSED_MANUAL,
-    BUCKET_RUNTIME_F5,
+    # BUCKET_RUNTIME_F5,
+    BUCKET_RUNTIME_F8,
     BUCKET_PRE_RAID_AUTO,
     BUCKET_RUNTIME_POLL_TEMP,
 )
-GUI_BUCKETS = (BUCKET_CLOSED_MANUAL, BUCKET_RUNTIME_F5, BUCKET_PRE_RAID_AUTO)
+# GUI_BUCKETS = (BUCKET_CLOSED_MANUAL, BUCKET_RUNTIME_F5, BUCKET_PRE_RAID_AUTO)
+GUI_BUCKETS = (BUCKET_CLOSED_MANUAL, BUCKET_RUNTIME_F8, BUCKET_PRE_RAID_AUTO)
 
 BUCKET_TITLES = {
     BUCKET_CLOSED_MANUAL: "关闭游戏的存档",
-    BUCKET_RUNTIME_F5: "运行时手动F5存档",
+    # BUCKET_RUNTIME_F5: "运行时手动F5存档",
+    BUCKET_RUNTIME_F8: "运行时手动F8存档",
     BUCKET_PRE_RAID_AUTO: "进本前自动存档",
 }
 
@@ -22,7 +26,8 @@ BUCKET_COLUMN_SPECS = {
         ("reason", "原因", 220, "w"),
         ("ok", "完整性", 90, "center"),
     ),
-    BUCKET_RUNTIME_F5: (
+    # BUCKET_RUNTIME_F5: (
+    BUCKET_RUNTIME_F8: (
         ("created", "时间", 220, "w"),
         ("ok", "完整性", 90, "center"),
     ),
@@ -34,14 +39,16 @@ BUCKET_COLUMN_SPECS = {
 
 BUCKET_LABELS = {
     BUCKET_CLOSED_MANUAL: "关闭游戏的存档",
-    BUCKET_RUNTIME_F5: "运行时手动F5存档",
+    # BUCKET_RUNTIME_F5: "运行时手动F5存档",
+    BUCKET_RUNTIME_F8: "运行时手动F8存档",
     BUCKET_PRE_RAID_AUTO: "进本前自动存档",
     BUCKET_RUNTIME_POLL_TEMP: "运行时临时轮询存档",
 }
 
 REASON_LABELS = {
     "manual_click": "手动保存（关闭游戏）",
-    "hotkey_f5": "手动F5保存",
+    # "hotkey_f5": "手动F5保存",
+    "hotkey_f8": "手动F8保存",
     "poll": "运行时轮询（临时）",
     "pre_restore_backup": "回档前自动备份",
     "pre_raid_auto": "进本前最后自动存档",
