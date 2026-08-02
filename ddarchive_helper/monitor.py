@@ -216,6 +216,7 @@ class MonitorEngine:
         return snap
 
     def trigger_f5_snapshot(self, source_reason: str = "hotkey_f5") -> Optional[SnapshotInfo]:
+        print(f"[Debug] 触发了 trigger_f5_snapshot，准备检测游戏是否运行...") # <-- 加上这行
         if not is_darkest_running():
             self._emit("info", message="游戏未运行，忽略F5存档")
             return None
