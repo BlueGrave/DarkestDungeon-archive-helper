@@ -9,7 +9,8 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 from .config import AppConfig
-from .constants import BUCKET_CLOSED_MANUAL, BUCKET_RUNTIME_F5, BUCKET_RUNTIME_POLL_TEMP
+# from .constants import BUCKET_CLOSED_MANUAL, BUCKET_RUNTIME_F5, BUCKET_RUNTIME_POLL_TEMP
+from .constants import BUCKET_CLOSED_MANUAL, BUCKET_RUNTIME_F8, BUCKET_RUNTIME_POLL_TEMP
 from .decoder import SaveDecoder
 from .errors import DDHelperError
 from .logger import ActionLogger
@@ -37,11 +38,13 @@ class WinMsg(ctypes.Structure):
 class HotkeyListener(threading.Thread):
     WM_HOTKEY = 0x0312
     WM_QUIT = 0x0012
-    VK_F5 = 0x74
+    VK_F8 = 0x77  # <--- 将虚拟键值从 F5 (0x74) 改为 F8 (0x77)
 
-    def __init__(self, on_f5: Any, logger: ActionLogger) -> None:
+    # def __init__(self, on_f5: Any, logger: ActionLogger) -> None:
+    def __init__(self, on_f8: Any, logger: ActionLogger) -> None:
         super().__init__(daemon=True)
-        self.on_f5 = on_f5
+        # self.on_f5 = on_f5
+        self.on_f8 = on_f8
         self.logger = logger
         self._thread_id: Optional[int] = None
         self._registered = False
@@ -52,12 +55,14 @@ class HotkeyListener(threading.Thread):
         user32 = ctypes.windll.user32
         kernel32 = ctypes.windll.kernel32
         self._thread_id = int(kernel32.GetCurrentThreadId())
-        ok = bool(user32.RegisterHotKey(None, 1, 0, self.VK_F5))
+        # ok = bool(user32.RegisterHotKey(None, 1, 0, self.VK_F5))
+        # 注册全局热键 F8 (修饰符为 0 表示无须组合键)
+        ok = bool(user32.RegisterHotKey(None, 1, 0, self.VK_F8))
         self._registered = ok
         if ok:
-            self.logger.info("Global hotkey F5 registered")
+            self.logger.info("Global hotkey F8 registered")
         else:
-            self.logger.error("Failed to register global hotkey F5")
+            self.logger.error("Failed to register global hotkey F8")
         self._ready_evt.set()
 
         msg = WinMsg()
@@ -67,7 +72,8 @@ class HotkeyListener(threading.Thread):
                 break
             if msg.message == self.WM_HOTKEY:
                 try:
-                    self.on_f5()
+                    # self.on_f5()
+                    self.on_f8() # 触发回调
                 except Exception as exc:
                     self.logger.error(f"Hotkey callback failed: {exc}")
             user32.TranslateMessage(ctypes.byref(msg))
@@ -75,7 +81,7 @@ class HotkeyListener(threading.Thread):
 
         if self._registered:
             user32.UnregisterHotKey(None, 1)
-            self.logger.info("Global hotkey F5 unregistered")
+            self.logger.info("Global hotkey F8 unregistered")
 
     def start(self) -> None:
         super().start()
@@ -102,7 +108,8 @@ class MonitorEngine:
         self._thread: Optional[threading.Thread] = None
         self._stop_evt = threading.Event()
         self._hotkey: Optional[HotkeyListener] = None
-        self._f5_requested = threading.Event()
+        # self._f5_requested = threading.Event()
+        self._f8_requested = threading.Event()
         self._last_inraid: Optional[bool] = None
         self._last_inraid_read_time = 0.0
         self._last_poll_time = 0.0
@@ -142,7 +149,8 @@ class MonitorEngine:
         self._running = True
         self._emit("info", message="监控已启动")
         if with_hotkey:
-            self._hotkey = HotkeyListener(on_f5=self.request_f5_snapshot, logger=self.logger)
+            # self._hotkey = HotkeyListener(on_f5=self.request_f5_snapshot, logger=self.logger)
+            self._hotkey = HotkeyListener(on_f8=self.request_f8_snapshot, logger=self.logger)
             self._hotkey.start()
             self._emit("hotkey", registered=self._hotkey.registered)
         self._thread = threading.Thread(target=self._run_loop, daemon=True)
@@ -160,12 +168,17 @@ class MonitorEngine:
         self._running = False
         self._emit("info", message="监控已停止")
 
-    def request_f5_snapshot(self) -> None:
-        self._f5_requested.set()
-        self._emit("info", message="收到F5请求")
+    # def request_f5_snapshot(self) -> None:
+        # self._f5_requested.set()
+        # self._emit("info", message="收到F5请求")
+
+    def request_f8_snapshot(self) -> None:
+        self._f8_requested.set()
+        self._emit("info", message="收到F8请求")
 
     def on_profile_changed(self) -> None:
-        self._f5_requested.clear()
+        # self._f5_requested.clear()
+        self._f8_requested.clear()
         self._last_inraid = None
         self._last_inraid_read_time = 0.0
         self._last_poll_time = 0.0
@@ -176,7 +189,8 @@ class MonitorEngine:
         self._emit("state", game_running=False, inraid=None, cloud_enabled=self.cloud_enabled)
 
     def on_save_root_changed(self) -> None:
-        self._f5_requested.clear()
+        # self._f5_requested.clear()
+        self._f8_requested.clear()
         self._last_inraid = None
         self._last_inraid_read_time = 0.0
         self._last_poll_time = 0.0
@@ -189,7 +203,8 @@ class MonitorEngine:
     def _should_read_inraid(self, now_time: float, game_running: bool) -> bool:
         if not game_running:
             return False
-        if self._f5_requested.is_set():
+        # if self._f5_requested.is_set():
+        if self._f8_requested.is_set():
             return True
         if self._last_inraid is True:
             interval_ms = max(1000, self.config.inraid_state_poll_interval_ms)
@@ -215,10 +230,11 @@ class MonitorEngine:
         self._emit("snapshot_created", snapshot=snap.to_dict())
         return snap
 
-    def trigger_f5_snapshot(self, source_reason: str = "hotkey_f5") -> Optional[SnapshotInfo]:
-        print(f"[Debug] 触发了 trigger_f5_snapshot，准备检测游戏是否运行...") # <-- 加上这行
+    # def trigger_f5_snapshot(self, source_reason: str = "hotkey_f5") -> Optional[SnapshotInfo]:
+    def trigger_f8_snapshot(self, source_reason: str = "hotkey_f8") -> Optional[SnapshotInfo]:
         if not is_darkest_running():
-            self._emit("info", message="游戏未运行，忽略F5存档")
+            # self._emit("info", message="游戏未运行，忽略F5存档")
+            self._emit("info", message="游戏未运行，忽略F8存档")
             return None
         inraid = None
         try:
@@ -226,7 +242,8 @@ class MonitorEngine:
         except Exception:
             inraid = None
         snap = self.manager.capture_snapshot(
-            bucket=BUCKET_RUNTIME_F5,
+            # bucket=BUCKET_RUNTIME_F5,
+            bucket=BUCKET_RUNTIME_F8,
             reason=source_reason,
             inraid_at_capture=inraid,
             dedupe_on_source_hash=False,
@@ -274,12 +291,19 @@ class MonitorEngine:
                 self._update_state(game_running, inraid)
                 self._emit("state", game_running=game_running, inraid=inraid, cloud_enabled=self.cloud_enabled)
 
-                if self._f5_requested.is_set():
-                    self._f5_requested.clear()
+                # if self._f5_requested.is_set():
+                    # self._f5_requested.clear()
+                    # try:
+                        # self.trigger_f5_snapshot(source_reason="hotkey_f5")
+                    # except Exception as exc:
+                        # self._set_error(f"F5 snapshot failed: {exc}")
+
+                if self._f8_requested.is_set():
+                    self._f8_requested.clear()
                     try:
-                        self.trigger_f5_snapshot(source_reason="hotkey_f5")
+                        self.trigger_f8_snapshot(source_reason="hotkey_f8")
                     except Exception as exc:
-                        self._set_error(f"F5 snapshot failed: {exc}")
+                        self._set_error(f"F8 snapshot failed: {exc}")
 
                 if self._last_inraid is not None and inraid is not None and (not self._last_inraid and inraid):
                     try:
